@@ -18,6 +18,7 @@
                 <th>Nivel Actual</th>
                 <th>Party</th>
                 <th>Mulo</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -30,26 +31,52 @@
     <form id="add-character-form">
         <label for="name">Nombre:</label>
         <input type="text" id="name" name="name" required><br>
+    
         <label for="class">Clase:</label>
-        <input type="text" id="class" name="class" required><br>
+        <select id="class" name="class" required>
+            <option value="">Selecciona una clase</option> <!-- Opción predeterminada para obligar al usuario a elegir -->
+            <option value="Dark Knight (DK)">DK</option>
+            <option value="Dark Wizard (DW)">DW</option>
+            <option value="Fairy Elf (Elf)">ELF</option>
+            <option value="Magic Gladiator (MG)">MG</option>
+            <option value="Dark Lord (DL)">DL</option>
+            <option value="Summoner">SM</option>
+            <option value="Rage Fighter (RF)">RF</option>
+            <option value="Grow Lancer (GL)">GL</option>
+            <option value="Rune Wizard (RW)">RW</option>
+            <option value="Slayer">SL</option>
+            <option value="Gun Crusher (GC)">GC</option>
+            <option value="Light Wizard (LW) ">LW</option>
+            <!-- Agrega más opciones si tienes otras clases en el juego -->
+        </select><br>
+    
         <label for="level">Nivel Actual:</label>
         <input type="number" id="level" name="level" required><br>
+    
         <label for="to_buy">Lo que necesita comprar:</label>
         <input type="text" id="to_buy" name="to_buy"><br>
+    
         <label for="to_sell">Lo que necesita vender:</label>
         <input type="text" id="to_sell" name="to_sell"><br>
+    
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required><br>
+    
         <label for="id_mugp">ID MUGP:</label>
         <input type="text" id="id_mugp" name="id_mugp" required><br>
+    
         <label for="password">Contraseña:</label>
         <input type="password" id="password" name="password" required><br>
+    
         <label for="is_party_master">Party Master:</label>
         <input type="checkbox" id="is_party_master" name="is_party_master"><br>
+    
         <label for="is_mule">Mulo:</label>
         <input type="checkbox" id="is_mule" name="is_mule"><br>
+    
         <button type="submit">Agregar</button>
     </form>
+    
     
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

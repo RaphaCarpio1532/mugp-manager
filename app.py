@@ -34,9 +34,48 @@ def add_character():
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
         (data['name'], data['class'], data['level'], data['to_buy'], data['to_sell'], data['email'], data['id_mugp'], data['password'], data['is_party_master'], data['is_mule'])
     )
+    print("Datos insertados")
     conn.commit()
     conn.close()
     return jsonify({'status': 'success'})
+
+@app.route('/delete_character/<int:id>', methods=['DELETE'])
+def delete_character(id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM characters WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
+@app.route('/get_parties', methods=['GET'])
+def get_parties():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, level FROM parties")  # Ajusta la consulta según tu estructura de tabla
+    parties = cursor.fetchall()
+    conn.close()
+    
+    # Formatear los datos de parties para enviarlos al frontend
+    parties_data = []
+    for party in parties:
+        party_id, name, level = party
+        # Suponiendo que tienes una tabla para los miembros del party, realiza una consulta para obtenerlos
+        cursor = connect_db().cursor()
+        cursor.execute("SELECT name FROM characters WHERE party_id = ?", (party_id,))
+        members = [member[0] for member in cursor.fetchall()]
+        
+        parties_data.append({
+            'id': party_id,
+            'name': name,
+            'level': level,
+            'members': members
+        })
+
+    return jsonify(parties_data)
+
+
 
 
 if __name__ == '__main__':

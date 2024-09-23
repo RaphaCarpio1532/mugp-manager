@@ -1,43 +1,94 @@
+/* Estilos generales */
 body {
-    background-color: #151515;
+    background: linear-gradient(90deg, #1c1c1c, #c7c5c5); /* Gradiente de fondo */
     color: white;
     font-family: 'Brooklyn', sans-serif;
-    margin: 0;
     padding: 20px;
+    margin: 10;
 }
 
 h1, h2 {
-    color: white;
+    text-align: center; /* Centramos los títulos */
+    margin-bottom: 20px; /* Espacio inferior para separar del contenido */
+    color: #eeeeee; /* Color del texto */
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    border: 1px solid white;
-    padding: 10px;
-    text-align: left;
-}
-
-input {
-    margin: 5px 0;
-    padding: 5px;
+/* Estilos del formulario */
+form {
+    max-width: 600px; /* Ajustar el ancho del formulario */
+    margin: 20px auto; /* Centrar el formulario */
+    padding: 20px;
     background-color: #252525;
-    color: white;
+    border-radius: 30px;
+    box-shadow: 0 4px 18px rgba(215, 212, 212, 0.2); /* Sombra para efecto 3D */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    margin-top: 15px; /* Añadir margen superior para dar más espacio */
+    margin-left: 10px; /* Separar el label del borde izquierdo */
+    font-weight: bold;
+}
+
+input, select, button {
+    margin-top: 10px;
+    padding: 10px;
+    width: calc(100% - 30px); /* Ajustar el ancho para dejar espacio en ambos lados */
+    margin-left: 10px; /* Añadir margen izquierdo */
+    background-color: #333;
     border: none;
-    width: 100%;
+    border-radius: 5px;
+    color: white;
+}
+
+input[type="checkbox"] {
+    width: auto; /* Ajusta el tamaño de los checkboxes */
+    margin-left: 10px;
 }
 
 button {
-    padding: 10px;
-    background-color: #252525;
-    color: white;
-    border: none;
+    background-color: #444;
     cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s; /* Transición suave */
 }
 
 button:hover {
-    background-color: #353535;
+    background-color: #edcb1e;
+    transform: translateY(-2px); /* Efecto hover */
+}
+
+/* Estilos de la tabla */
+table {
+    width: 90%; /* Ajustar el tamaño de la tabla */
+    margin: 20px auto; /* Centrar la tabla */
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra alrededor de la tabla */
+}
+
+th, td {
+    padding: 25px;
+    text-align: left;
+    border: 1px solid #444;
+}
+
+thead {
+    background-color: #333;
+    text-align: left;
+}
+
+tbody tr:hover {
+    background-color: #b8860b; /* Color dorado */
+    color: black; /* Cambiar el texto a negro para contraste */
+    transition: background-color 0.3s ease; /* Transición suave */
+}
+
+/* Estilo para el contenedor de parties */
+.party-box {
+    background-color: #252525;
+    border: 1px solid #444;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
