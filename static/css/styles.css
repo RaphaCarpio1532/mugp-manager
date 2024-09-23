@@ -1,0 +1,43 @@
+body {
+    background-color: #151515;
+    color: white;
+    font-family: 'Brooklyn', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid white;
+    padding: 10px;
+    text-align: left;
+}
+
+input {
+    margin: 5px 0;
+    padding: 5px;
+    background-color: #252525;
+    color: white;
+    border: none;
+    width: 100%;
+}
+
+button {
+    padding: 10px;
+    background-color: #252525;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #353535;
+}
