@@ -1,56 +1,86 @@
-/* Estilos generales */
-body {
-    background: linear-gradient(135deg, #1c1c1c, #333); /* Gradiente de fondo */
-    color: white;
-    font-family: 'Brooklyn', sans-serif;
+#characters-table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+#characters-table th, #characters-table td {
+    border: 1px solid #ffffff;
+    padding: 10px;
+}
+
+#add-character-form {
+    width: 50%;
+    margin: 20px auto;
+    background-color: #333;
     padding: 20px;
-    margin: 0;
+    border-radius: 8px;
 }
 
-h1, h2 {
-    text-align: center; /* Centramos los títulos */
-    margin-bottom: 20px; /* Espacio inferior */
-    color: #fff;
+#add-character-form label {
+    display: block;
+    margin-top: 10px;
+    color: #ffffff;
 }
 
-/* Estilos del formulario */
-form {
-    max-width: 600px; /* Ancho del formulario */
+#add-character-form input, #add-character-form select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 4px;
+}
+
+#add-character-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #555;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#add-character-form button:hover {
+    background-color: #777;
+}
+
+#parties-container {
+    width: 80%;
     margin: 20px auto;
     padding: 20px;
-    background-color: #252525;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #222;
+    border-radius: 8px;
 }
 
-label {
-    display: block;
-    margin-bottom: 5px;
-    margin-top: 10px; /* Añadir espacio superior */
-}
-
-input, select, button {
-    margin-top: 5px;
-    padding: 10px;
-    width: calc(100% - 20px);
-    margin-left: 10px;
-    background-color: #333;
-    border: none;
-    border-radius: 5px;
-    color: white;
-}
-
-button {
+.party-box {
     background-color: #444;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.party-box h3 {
+    color: #ffffff;
+}
+
+.party-box ul {
+    list-style-type: none;
+    padding: 0;
+    color: #ffffff;
+}
+
+.party-box button {
+    padding: 5px 10px;
+    background-color: #555;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-button:hover {
-    background-color: #edcb1e;
-}
-
-/* Estilos del contenedor de parties */
-#parties-container {
-    margin
+.party-box button:hover {
+    background-color: #777;
 }

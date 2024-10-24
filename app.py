@@ -1,124 +1,131 @@
-from flask import Flask, render_template, request, jsonify
-import sqlite3
+from flask import Flask, request, jsonify, render_template
+from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
 
-# Conexión a la base de datos
-def connect_db():
-    return sqlite3.connect('database.db')
+# Database Configuration
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'database.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Ruta para cargar el HTML
+db = SQLAlchemy(app)
+
+# Database Models
+class Character(db.Model):
+    __tablename__ = 'characters'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
+    level = db.Column(db.Integer, nullable=False)
+    to_buy = db.Column(db.String(200))
+    to_sell = db.Column(db.String(200))
+    email = db.Column(db.String(100), nullable=False)
+    id_mugp = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    is_party_master = db.Column(db.Boolean, default=False)
+    is_mule = db.Column(db.Boolean, default=False)
+    character_class = db.relationship('Class', backref='characters')
+
+class Class(db.Model):
+    __tablename__ = 'classes'
+    id = db.Column(db.Integer, primary_key=True)
+    class_name = db.Column(db.String(100), nullable=False)
+
+class Party(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    members = db.relationship('Character', secondary='party_members', backref='parties')
+
+party_members = db.Table('party_members',
+    db.Column('party_id', db.Integer, db.ForeignKey('party.id'), primary_key=True),
+    db.Column('character_id', db.Integer, db.ForeignKey('characters.id'), primary_key=True)
+)
+
+# Main Route
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Ruta para obtener personajes
+# Endpoint to Get Characters
 @app.route('/get_characters', methods=['GET'])
 def get_characters():
-    conn = connect_db()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT c.name, cl.class_name, c.current_level, c.is_party_master, c.is_mule 
-        FROM characters c
-        JOIN classes cl ON c.class_id = cl.id
-    ''')
-    characters = cursor.fetchall()
-    conn.close()
-    return jsonify(characters)
+    characters = Character.query.all()
+    characters_list = []
+    for char in characters:
+        character_class_name = char.character_class.class_name if char.character_class else "Unknown"
+        characters_list.append([
+            char.name, 
+            character_class_name, 
+            char.level, 
+            char.to_buy, 
+            char.to_sell, 
+            char.email, 
+            char.id_mugp, 
+            char.is_party_master, 
+            char.is_mule, 
+            char.id
+        ])
+    return jsonify(characters_list)
 
-# Ruta para agregar personajes
+# Endpoint to Get Classes
+@app.route('/get_classes', methods=['GET'])
+def get_classes():
+    classes = Class.query.all()
+    classes_list = [{'id': cls.id, 'class_name': cls.class_name} for cls in classes]
+    return jsonify(classes_list)
+
+# Endpoint to Add a Character
 @app.route('/add_character', methods=['POST'])
 def add_character():
-    data = request.get_json()
-    print(data)
-    
-    # Asegurarnos de que 'is_party_master' y 'is_mule' tengan valores predeterminados
-    is_party_master = data.get('is_party_master', False)  # False si no está presente
-    is_mule = data.get('is_mule', False)  # False si no está presente
-    
-    conn = connect_db()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO characters (name, class_id, current_level, to_buy, to_sell, email, id_mugp, password, is_party_master, is_mule)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-        (data['name'], data['class'], data['level'], data['to_buy'], data['to_sell'], data['email'], data['id_mugp'], data['password'], is_party_master, is_mule)
-    )
-    print("Datos insertados")
-    conn.commit()
-    conn.close()
-    return jsonify({'status': 'success'})
+    try:
+        data = request.get_json()
+        new_character = Character(
+            name=data['name'],
+            class_id=data['class_id'],
+            level=data['level'],
+            to_buy=data.get('to_buy'),
+            to_sell=data.get('to_sell'),
+            email=data['email'],
+            id_mugp=data['id_mugp'],
+            password=data['password'],
+            is_party_master=data.get('is_party_master', False),
+            is_mule=data.get('is_mule', False)
+        )
+        db.session.add(new_character)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        print(f"Error al agregar personaje: {e}")
+        return jsonify({'status': 'error', 'message': str(e)})
 
-
-@app.route('/delete_character/<int:id>', methods=['DELETE'])
-def delete_character(id):
-    conn = connect_db()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM characters WHERE id = ?", (id,))
-    conn.commit()
-    conn.close()
-    return jsonify({'status': 'success'})
-
-
+# Endpoint to Create a Party
 @app.route('/add_party', methods=['POST'])
 def add_party():
-    data = request.json
-    party_name = data['party_name']
-    character_ids = data['character_ids']  # Lista de IDs de personajes seleccionados
-    
-    conn = connect_db()
-    cursor = conn.cursor()
-    
-    # Insertar el party
-    cursor.execute('INSERT INTO parties (party_name) VALUES (?)', (party_name,))
-    party_id = cursor.lastrowid
-    
-    # Insertar los personajes en el party
-    for character_id in character_ids:
-        cursor.execute('INSERT INTO party_members (party_id, character_id) VALUES (?, ?)', (party_id, character_id))
-    
-    conn.commit()
-    conn.close()
-    
+    data = request.get_json()
+    new_party = Party(name=data['party_name'])
+    db.session.add(new_party)
+    db.session.commit()
+    # Add members to the party
+    for char_id in data['character_ids']:
+        character = Character.query.get(char_id)
+        if character:
+            new_party.members.append(character)
+    db.session.commit()
     return jsonify({'status': 'success'})
 
-# Ruta para obtener los parties y sus miembros
+# Endpoint to Get Parties
 @app.route('/get_parties', methods=['GET'])
 def get_parties():
-    conn = connect_db()
-    cursor = conn.cursor()
-    
-    # Obtener todos los parties
-    cursor.execute("SELECT id, party_name FROM parties")
-    parties = cursor.fetchall()
-
-    parties_list = []
-    
-    # Iterar sobre cada party y obtener sus miembros
-    for party in parties:
-        party_id, party_name = party
-        
-        # Obtener los miembros del party
-        cursor.execute('''
-            SELECT c.name, c.current_level
-            FROM party_members pm
-            JOIN characters c ON pm.character_id = c.id
-            WHERE pm.party_id = ?
-        ''', (party_id,))
-        
-        members = cursor.fetchall()
-        member_list = [{'name': member[0], 'level': member[1]} for member in members]
-        
-        # Formatear la información del party
-        parties_list.append({
-            'id': party_id,
-            'party_name': party_name,
-            'members': member_list
-        })
-
-    conn.close()
+    parties = Party.query.all()
+    parties_list = [{
+        'party_name': party.name,
+        'members': [{'name': member.name, 'level': member.level} for member in party.members],
+        'id': party.id
+    } for party in parties]
     return jsonify(parties_list)
 
-
-
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()  # Create tables if they do not exist
     app.run(debug=True)
