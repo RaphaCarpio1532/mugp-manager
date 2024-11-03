@@ -1,86 +1,219 @@
-#characters-table {
-    width: 80%;
-    margin: 0 auto;
-    border-collapse: collapse;
+/* =============================
+   Estilos Generales
+============================= */
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(to bottom, #9b59b6, #2c003e);
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* =============================
+   Encabezado
+============================= */
+header {
+    width: 100%;
+    padding: 3rem 2rem;
     text-align: center;
 }
 
-#characters-table th, #characters-table td {
-    border: 1px solid #ffffff;
-    padding: 10px;
+header h1 {
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
 
-#add-character-form {
-    width: 50%;
-    margin: 20px auto;
-    background-color: #333;
-    padding: 20px;
-    border-radius: 8px;
-}
-
-#add-character-form label {
-    display: block;
-    margin-top: 10px;
-    color: #ffffff;
-}
-
-#add-character-form input, #add-character-form select {
-    width: calc(100% - 20px);
-    padding: 10px;
-    margin: 5px 0;
-    border: none;
-    border-radius: 4px;
-}
-
-#add-character-form button {
+/* =============================
+   Principal
+============================= */
+main {
     width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+}
+
+/* =============================
+   Contenedor de la Lista de Personajes
+============================= */
+#characters-list-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Ajuste para que ocupe todo el ancho de la pantalla */
+}
+
+.container {
+    width: 90%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    margin-bottom: 2rem;
+}
+
+/* =============================
+   Formulario y Campos de Entrada
+============================= */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+label {
+    font-weight: 500;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+select {
     padding: 10px;
-    background-color: #555;
-    color: #ffffff;
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid #6a5acd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #ffffff;
+    color: #333333;
+}
+
+/* =============================
+   Botones Generales
+============================= */
+button {
+    background-color: #2c1535;
+    color: white;
+    padding: 0.8rem 1.5rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 25px;
+    font-weight: 700;
     cursor: pointer;
-    margin-top: 10px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    margin-top: 1rem;
 }
 
-#add-character-form button:hover {
-    background-color: #777;
+button:hover {
+    background-color: #8d4ea7;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
 }
 
-#parties-container {
-    width: 80%;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #222;
+#open-modal-button {
+    background-color: #6a5acd;
+    color: #ffffff;
+    padding: 0.8rem 2rem;
+    margin: 1rem auto;
+    display: block;
+    font-size: 1rem;
+}
+
+/* =============================
+   Tabla de Personajes
+============================= */
+table {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0.3rem 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+table th, table td {
+    padding: 0.8rem 1rem; /* Espacio adicional para un diseño más limpio */
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    font-size: 1rem;
+}
+
+table th {
+    background-color: #6a5acd;
+    color: #eeeeee;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     border-radius: 8px;
 }
 
-.party-box {
-    background-color: #444;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
+table thead tr {
+    background-color: #8d4ea7;
+    color: #fff;
 }
 
-.party-box h3 {
-    color: #ffffff;
+/* =============================
+   Modal
+============================= */
+.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
-.party-box ul {
-    list-style-type: none;
-    padding: 0;
+.modal-content {
+    background-color: #2c003e;
     color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
 }
 
-.party-box button {
-    padding: 5px 10px;
-    background-color: #555;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #8d4ea7;
     cursor: pointer;
+    background: none;
+    border: none;
+    outline: none;
+}
+.close-button:hover {
+    color: #2c1535;
 }
 
-.party-box button:hover {
-    background-color: #777;
+/* =============================
+   Botones de Acción (Modificar y Eliminar)
+============================= */
+.edit-button, .delete-button {
+    padding: 0.4rem 0.8rem;
+    margin: 0.2rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+
+.edit-button {
+    background-color: #4caf50;
+}
+
+.delete-button {
+    background-color: #f44336;
+}
+
+.edit-button:hover {
+    background-color: #45a049;
+}
+
+.delete-button:hover {
+    background-color: #e53935;
 }

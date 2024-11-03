@@ -1,17 +1,23 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 
 app = Flask(__name__)
 
-# Database Configuration
+# ==============================
+# Configuración de Base de Datos
+# ==============================
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Database Models
+# ==============================
+# Definición de Modelos
+# ==============================
+
 class Character(db.Model):
     __tablename__ = 'characters'
     id = db.Column(db.Integer, primary_key=True)
@@ -34,7 +40,7 @@ class Class(db.Model):
 
 class Party(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    party_name = db.Column(db.String(100), nullable=False)
     members = db.relationship('Character', secondary='party_members', backref='parties')
 
 party_members = db.Table('party_members',
@@ -42,41 +48,45 @@ party_members = db.Table('party_members',
     db.Column('character_id', db.Integer, db.ForeignKey('characters.id'), primary_key=True)
 )
 
-# Main Route
+# ==============================
+# Rutas para Renderizado HTML
+# ==============================
+
 @app.route('/')
-def index():
+def homepage():
     return render_template('index.html')
 
-# Endpoint to Get Characters
-@app.route('/get_characters', methods=['GET'])
+# ==============================
+# Rutas de API - CRUD de Personajes
+# ==============================
+
+@app.route('/api/get_characters', methods=['GET'])
 def get_characters():
     characters = Character.query.all()
-    characters_list = []
-    for char in characters:
-        character_class_name = char.character_class.class_name if char.character_class else "Unknown"
-        characters_list.append([
-            char.name, 
-            character_class_name, 
-            char.level, 
-            char.to_buy, 
-            char.to_sell, 
-            char.email, 
-            char.id_mugp, 
-            char.is_party_master, 
-            char.is_mule, 
+    characters_list = [
+        [
+            char.name,
+            char.character_class.class_name if char.character_class else "Unknown",
+            char.level,
+            char.to_buy,
+            char.to_sell,
+            char.email,
+            char.id_mugp,
+            char.is_party_master,
+            char.is_mule,
             char.id
-        ])
+        ]
+        for char in characters
+    ]
     return jsonify(characters_list)
 
-# Endpoint to Get Classes
-@app.route('/get_classes', methods=['GET'])
+@app.route('/api/get_classes', methods=['GET'])
 def get_classes():
     classes = Class.query.all()
     classes_list = [{'id': cls.id, 'class_name': cls.class_name} for cls in classes]
     return jsonify(classes_list)
 
-# Endpoint to Add a Character
-@app.route('/add_character', methods=['POST'])
+@app.route('/api/add_character', methods=['POST'])
 def add_character():
     try:
         data = request.get_json()
@@ -99,14 +109,44 @@ def add_character():
         print(f"Error al agregar personaje: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
 
-# Endpoint to Create a Party
-@app.route('/add_party', methods=['POST'])
-def add_party():
+@app.route('/api/update_character/<int:character_id>', methods=['PUT'])
+def update_character(character_id):
+    data = request.get_json()
+    character = Character.query.get(character_id)
+    if character:
+        character.name = data['name']
+        character.class_id = data['class_id']
+        character.level = data['level']
+        character.to_buy = data.get('to_buy')
+        character.to_sell = data.get('to_sell')
+        character.email = data['email']
+        character.id_mugp = data['id_mugp']
+        character.password = data['password']
+        character.is_party_master = data.get('is_party_master', False)
+        character.is_mule = data.get('is_mule', False)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    return jsonify({'status': 'error', 'message': 'Personaje no encontrado'})
+
+@app.route('/api/delete_character/<int:character_id>', methods=['DELETE'])
+def delete_character(character_id):
+    character = Character.query.get(character_id)
+    if character:
+        db.session.delete(character)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    return jsonify({'status': 'error', 'message': 'Personaje no encontrado'})
+
+# ==============================
+# Rutas de API - Gestión de Parties
+# ==============================
+
+@app.route('/api/create_party', methods=['POST'])
+def create_party():
     data = request.get_json()
     new_party = Party(name=data['party_name'])
     db.session.add(new_party)
     db.session.commit()
-    # Add members to the party
     for char_id in data['character_ids']:
         character = Character.query.get(char_id)
         if character:
@@ -114,18 +154,24 @@ def add_party():
     db.session.commit()
     return jsonify({'status': 'success'})
 
-# Endpoint to Get Parties
-@app.route('/get_parties', methods=['GET'])
+@app.route('/api/get_parties', methods=['GET'])
 def get_parties():
     parties = Party.query.all()
-    parties_list = [{
-        'party_name': party.name,
-        'members': [{'name': member.name, 'level': member.level} for member in party.members],
-        'id': party.id
-    } for party in parties]
+    parties_list = [
+        {
+            'party_name': party.party_name,
+            'members': [{'name': member.name, 'level': member.level} for member in party.members],
+            'id': party.id
+        }
+        for party in parties
+    ]
     return jsonify(parties_list)
+
+# ==============================
+# Inicialización de la Base de Datos
+# ==============================
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Create tables if they do not exist
+        db.create_all()
     app.run(debug=True)

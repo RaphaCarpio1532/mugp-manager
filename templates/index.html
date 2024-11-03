@@ -7,86 +7,112 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1>Mis Personajes de MUGP</h1>
+    <header>
+        <h1>Mis Personajes de MUGP</h1>
+    </header>
 
-    <table id="characters-table">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Clase</th>
-                <th>Nivel Actual</th>
-                <th>Lo que necesita comprar</th>
-                <th>Lo que necesita vender</th>
-                <th>Email</th>
-                <th>ID MUGP</th>
-                <th>Party Master</th>
-                <th>Mulo</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Aquí se llenarán los datos -->
-        </tbody>
-    </table>
+    <main>
+        <!-- Contenedor para la lista de personajes -->
+        <div class="container" id="characters-list-container">
+            <h2>Lista de Personajes</h2>
+            <table id="characters-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Clase</th>
+                        <th>Nivel Actual</th>
+                        <th>Comprar</th>
+                        <th>Vender</th>
+                        <th>Email</th>
+                        <th>ID MUGP</th>
+                        <th>Party Master</th>
+                        <th>Mulo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se llenarán los datos -->
+                </tbody>
+            </table>
+        </div>
 
-    <h2>Agregar Personaje</h2>
-    <form id="add-character-form">
-        <label for="name">Nombre:</label>
-        <input type="text" id="name" name="name" required><br>
 
-        <label for="class">Clase:</label>
-        <select id="class" name="class" required>
-            <!-- Las opciones de clases se llenarán dinámicamente con JavaScript -->
-        </select><br>
+        <!-- Botón para abrir el modal -->
+<button id="open-modal-button">Agregar Personaje</button>
 
-        <label for="level">Nivel Actual:</label>
-        <input type="number" id="level" name="level" required><br>
+<!-- Modal para el formulario -->
+<div id="modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="close-modal-button">&times;</span>
+        <h2>Agregar Personaje</h2>
+        <form id="add-character-form">
+            <!-- Contenedor para agregar un personaje -->
+        <div class="container" id="form-container">
+            <h2>Agregar Personaje</h2>
+            <form id="add-character-form">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" name="name" required>
 
-        <label for="to_buy">Lo que necesita comprar:</label>
-        <input type="text" id="to_buy" name="to_buy"><br>
+                <label for="class">Clase:</label>
+                <select id="class" name="class" required>
+                    <!-- Las opciones de clases se llenarán dinámicamente con JavaScript -->
+                </select>
 
-        <label for="to_sell">Lo que necesita vender:</label>
-        <input type="text" id="to_sell" name="to_sell"><br>
+                <label for="level">Nivel Actual:</label>
+                <input type="number" id="level" name="level" required>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br>
+                <label for="to_buy">Comprar:</label>
+                <input type="text" id="to_buy" name="to_buy">
 
-        <label for="id_mugp">ID MUGP:</label>
-        <input type="text" id="id_mugp" name="id_mugp" required><br>
+                <label for="to_sell">Vender:</label>
+                <input type="text" id="to_sell" name="to_sell">
 
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" required><br>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
 
-        <label for="is_party_master">Party Master:</label>
-        <input type="checkbox" id="is_party_master" name="is_party_master"><br>
+                <label for="id_mugp">ID MUGP:</label>
+                <input type="text" id="id_mugp" name="id_mugp" required>
 
-        <label for="is_mule">Mulo:</label>
-        <input type="checkbox" id="is_mule" name="is_mule"><br>
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" required>
 
-        <button type="submit">Agregar</button>
-    </form>
-    
-    <!-- Botón para mostrar el formulario de creación de parties -->
-    <button id="create-party-btn" onclick="showCreatePartyForm()">Crear Party</button>
-    
-    <!-- Contenedor para el formulario de crear party -->
-    <div id="party-form-container" style="display: none;">
-        <h2>Crear Party</h2>
-        <form id="create-party-form">
-            <label for="party-name">Nombre del Party:</label>
-            <input type="text" id="party-name" name="party-name" required><br>
-            
-            <label for="party-members">Selecciona personajes:</label>
-            <select id="party-members" name="party-members" multiple required>
-                <!-- Las opciones de personajes se llenarán dinámicamente con JavaScript -->
-            </select><br>
-            
-            <button type="submit">Crear Party</button>
+                <label for="is_party_master">Party Master:</label>
+                <input type="checkbox" id="is_party_master" name="is_party_master">
+
+                <label for="is_mule">Mulo:</label>
+                <input type="checkbox" id="is_mule" name="is_mule">
+
+                <button type="submit">Agregar Personaje</button>
+            </form>
+        </div>
         </form>
     </div>
+</div>
 
-    <!-- Contenedor donde se mostrarán los parties -->
-    <div id="parties-container"></div>
+
+        
+
+        <!-- Contenedor para crear party -->
+        <div class="container" id="party-form-container" style="display: none;">
+            <h2>Crear Party</h2>
+            <form id="create-party-form">
+                <label for="party-name">Nombre del Party:</label>
+                <input type="text" id="party-name" name="party-name" required>
+
+                <label for="party-members">Selecciona personajes:</label>
+                <select id="party-members" name="party-members" multiple required>
+                    <!-- Las opciones de personajes se llenarán dinámicamente con JavaScript -->
+                </select>
+
+                <button type="submit">Crear Party</button>
+            </form>
+        </div>
+
+        <!-- Contenedor donde se mostrarán los parties -->
+        <div class="container" id="parties-container"></div>
+    </main>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
+
