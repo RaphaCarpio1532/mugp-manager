@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MUGP Characters</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
 </head>
 <body>
     <header>
@@ -13,6 +15,7 @@
 
     <main>
         <!-- Contenedor para la lista de personajes -->
+        <section id="characters-section">
         <div class="container" id="characters-list-container">
             <h2>Lista de Personajes</h2>
             <table id="characters-table">
@@ -38,7 +41,11 @@
 
 
         <!-- Botón para abrir el modal -->
-<button id="open-modal-button">Agregar Personaje</button>
+        <div class="button-container">
+            <button id="open-modal-button">Agregar Personaje</button>
+        </div>
+    </section>
+
 
 <!-- Modal para el formulario -->
 <div id="modal" class="modal" style="display: none;">
@@ -46,12 +53,8 @@
         <span class="close-button" id="close-modal-button">&times;</span>
         <h2>Agregar Personaje</h2>
         <form id="add-character-form">
-            <!-- Contenedor para agregar un personaje -->
-        <div class="container" id="form-container">
-            <h2>Agregar Personaje</h2>
-            <form id="add-character-form">
-                <label for="name">Nombre:</label>
-                <input type="text" id="name" name="name" required>
+            <label for="name">Nombre:</label>
+            <input type="text" id="name" name="name" required>
 
                 <label for="class">Clase:</label>
                 <select id="class" name="class" required>
@@ -92,26 +95,39 @@
 
         
 
-        <!-- Contenedor para crear party -->
-        <div class="container" id="party-form-container" style="display: none;">
-            <h2>Crear Party</h2>
-            <form id="create-party-form">
-                <label for="party-name">Nombre del Party:</label>
-                <input type="text" id="party-name" name="party-name" required>
+      <!-- Sección de Parties -->
+<section id="parties-section">
+    <h2>Lista de Parties</h2>
+    <!-- Contenedor donde se mostrarán los parties -->
+    <div class="parties-container" id="parties-container">
+        <!-- Aquí se insertarán las parties dinámicamente -->
+    </div>
+    <div class="button-container">
+        <button id="open-party-modal-button">Crear Party</button>
+    </div>
+</section>
 
-                <label for="party-members">Selecciona personajes:</label>
-                <select id="party-members" name="party-members" multiple required>
-                    <!-- Las opciones de personajes se llenarán dinámicamente con JavaScript -->
-                </select>
+<!-- Modal para formulario de parties -->
+<div id="party-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="close-party-modal-button">&times;</span>
+        <h2>Crear Party</h2>
+        <form id="create-party-form">
+            <label for="party-name">Nombre del Party:</label>
+            <input type="text" id="party-name" name="party-name" required>
 
-                <button type="submit">Crear Party</button>
-            </form>
-        </div>
+            <label for="party-members">Selecciona personajes:</label>
+            <select id="party-members" name="party-members" multiple required>
+                <!-- Las opciones de personajes se llenarán dinámicamente con JavaScript -->
+            </select>
 
-        <!-- Contenedor donde se mostrarán los parties -->
-        <div class="container" id="parties-container"></div>
-    </main>
+            <button type="submit">Crear Party</button>
+        </form>
+    </div>
+</div>
 
+
+<!--SCRIPTS-->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

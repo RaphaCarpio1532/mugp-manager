@@ -56,6 +56,10 @@ party_members = db.Table('party_members',
 def homepage():
     return render_template('index.html')
 
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('css/favicon.ico')
+
 # ==============================
 # Rutas de API - CRUD de Personajes
 # ==============================
@@ -108,6 +112,26 @@ def add_character():
     except Exception as e:
         print(f"Error al agregar personaje: {e}")
         return jsonify({'status': 'error', 'message': str(e)})
+    
+@app.route('/api/get_character/<int:character_id>', methods=['GET'])
+def get_character(character_id):
+    character = Character.query.get(character_id)
+    if character:
+        character_data = {
+            'name': character.name,
+            'class_id': character.class_id,
+            'level': character.level,
+            'to_buy': character.to_buy,
+            'to_sell': character.to_sell,
+            'email': character.email,
+            'id_mugp': character.id_mugp,
+            'password': character.password,
+            'is_party_master': character.is_party_master,
+            'is_mule': character.is_mule
+        }
+        return jsonify(character_data)
+    else:
+        return jsonify({'status': 'error', 'message': 'Personaje no encontrado'}), 404
 
 @app.route('/api/update_character/<int:character_id>', methods=['PUT'])
 def update_character(character_id):
@@ -143,16 +167,24 @@ def delete_character(character_id):
 
 @app.route('/api/create_party', methods=['POST'])
 def create_party():
-    data = request.get_json()
-    new_party = Party(name=data['party_name'])
-    db.session.add(new_party)
-    db.session.commit()
-    for char_id in data['character_ids']:
-        character = Character.query.get(char_id)
-        if character:
-            new_party.members.append(character)
-    db.session.commit()
-    return jsonify({'status': 'success'})
+    try:
+        data = request.get_json()
+        new_party = Party(party_name=data['party_name'])
+        db.session.add(new_party)
+        db.session.commit()
+
+        #Asignar los miembros al party
+        for char_id in data['character_ids']:
+            character = Character.query.get(char_id)
+            if character:
+                new_party.members.append(character)
+        db.session.commit()
+        
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        print(f"Error al crear el party: {e}")
+        return jsonify({'status': 'error', 'message': str(e)})
+
 
 @app.route('/api/get_parties', methods=['GET'])
 def get_parties():
@@ -160,12 +192,67 @@ def get_parties():
     parties_list = [
         {
             'party_name': party.party_name,
-            'members': [{'name': member.name, 'level': member.level} for member in party.members],
+            'members': [
+                {
+                    'name': member.name,
+                    'class_name': member.character_class.class_name, 
+                    'level': member.level
+                } 
+                for member in party.members],
             'id': party.id
         }
         for party in parties
     ]
     return jsonify(parties_list)
+
+@app.route('/api/delete_party/<int:party_id>', methods=['DELETE'])
+def delete_party(party_id):
+    party = Party.query.get(party_id)
+    if party:
+        db.session.delete(party)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Party no encontrado'}), 404
+
+@app.route('/api/update_party/<int:party_id>', methods=['PUT'])
+def update_party(party_id):
+    data = request.get_json()
+    party = Party.query.get(party_id)
+    if party:
+        party.party_name = data['party_name']
+        # Limpiar miembros actuales
+        party.members.clear()
+        # Agregar nuevos miembros
+        for char_id in data['character_ids']:
+            character = Character.query.get(char_id)
+            if character:
+                party.members.append(character)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    else:
+        return jsonify({'status': 'error', 'message': 'Party no encontrado'}), 404
+
+@app.route('/api/get_party/<int:party_id>', methods=['GET'])
+def get_party(party_id):
+    party = Party.query.get(party_id)
+    if party:
+        party_data = {
+            'party_name': party.party_name,
+            'members': [
+                {
+                    'id': member.id,
+                    'name': member.name,
+                    'class_name': member.character_class.class_name,
+                    'level': member.level
+                }
+                for member in party.members
+            ],
+            'id': party.id
+        }
+        return jsonify(party_data)
+    else:
+        return jsonify({'status': 'error', 'message': 'Party no encontrado'}), 404
 
 # ==============================
 # Inicialización de la Base de Datos

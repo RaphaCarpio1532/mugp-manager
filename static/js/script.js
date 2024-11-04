@@ -1,23 +1,118 @@
-console.log("Archivo de script cargado")
+// ================================
+// Variables Globales y Estado
+// ================================
+let isEditing = false;             // Indica si se está editando un personaje
+let currentCharacterId = null;     // ID del personaje actual en edición
+let isEditingParty = false;        // Indica si se está editando un party
+let currentPartyId = null;         // ID del party actual en edición
+
+// ================================
+// Inicialización del DOM
+// ================================
 document.addEventListener('DOMContentLoaded', function() {
-    loadCharacters(); // Cargar los personajes al cargar la página
-    loadParties(); // Cargar los parties al cargar la página
-    loadClasses(); // Cargar las clases al cargar la página
+    console.log("Archivo de script cargado");
+
+    // Variables para los modales y botones
+    const modal = document.getElementById('modal');
+    const openModalButton = document.getElementById('open-modal-button');
+    const closeModalButton = document.getElementById('close-modal-button');
+    const partyModal = document.getElementById('party-modal');
+    const openPartyModalButton = document.getElementById('open-party-modal-button');
+    const closePartyModalButton = document.getElementById('close-party-modal-button');
+
+    // Inicializar funciones
+    loadCharacters();
+    loadParties();
+    loadClasses();
+
+    // ================================
+    // Event Listeners - Modal de Personajes
+    // ================================
+    openModalButton.addEventListener('click', () => {
+        isEditing = false;
+        currentCharacterId = null;
+        resetCharacterForm();
+        modal.style.display = 'flex';
+    });
+
+    closeModalButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // ================================
+    // Event Listeners - Modal de Parties
+    // ================================
+    openPartyModalButton.addEventListener('click', () => {
+        isEditingParty = false;
+        currentPartyId = null;
+        resetPartyForm();
+        loadPartyMembers();
+        partyModal.style.display = 'flex';
+    });
+
+    closePartyModalButton.addEventListener('click', () => {
+        partyModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === partyModal) {
+            partyModal.style.display = 'none';
+        }
+    });
+
+    // ================================
+    // Event Listener - Formulario de Personaje
+    // ================================
+    document.querySelector('#add-character-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita el envío predeterminado del formulario
+        if (isEditing) {
+            updateCharacter(currentCharacterId); // Llama a la función para actualizar
+        } else {
+            addCharacter(); // Llama a la función para agregar
+        }
+    });
+
+    // ================================
+    // Event Listener - Formulario de Party
+    // ================================
+    document.querySelector('#create-party-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const partyName = document.querySelector('#party-name').value;
+        const selectedCharacters = Array.from(document.querySelector('#party-members').selectedOptions).map(option => option.value);
+
+        const partyData = {
+            party_name: partyName,
+            character_ids: selectedCharacters
+        };
+
+        if (isEditingParty) {
+            updateParty(currentPartyId, partyData);
+        } else {
+            createParty(partyData);
+        }
+    });
 });
 
-// Función para cargar y mostrar los personajes
+// ================================
+// Funciones - CRUD de Personajes
+// ================================
+
+// Cargar y mostrar los personajes en la tabla
 function loadCharacters() {
-    fetch('/api/get_characters') //1. Hacer una solicitud a la API Para obener personajes
-
-        .then(response => response.json()) //2. convertir la respuesta en json
- 
-        .then(data => { //3. procesar los datos obtenidos
-
+    fetch('/api/get_characters')
+        .then(response => response.json())
+        .then(data => {
             const charactersTable = document.querySelector('#characters-table tbody');
-            charactersTable.innerHTML = ''; // Limpiar contenido previo
-
-            data.forEach(character => { //4. Crear y agregar una fila en la tabla por cada personaje
-                const row = document.createElement('tr'); //5 Crear un elemento <tr> para la fila
+            charactersTable.innerHTML = '';
+            data.forEach(character => {
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${character[0]}</td>
                     <td>${character[1]}</td>
@@ -33,141 +128,14 @@ function loadCharacters() {
                         <button class="delete-button" onclick="deleteCharacter(${character[9]})">Eliminar</button>
                     </td>
                 `;
-                charactersTable.appendChild(row); //6 Añadir la fila al cuerpo de la tabla
+                charactersTable.appendChild(row);
             });
         })
-        .catch(error => console.error('Error al cargar personajes:', error)); //7 manejar errores
+        .catch(error => console.error('Error al cargar personajes:', error));
 }
 
-// Función para cargar las clases y llenar el select correspondiente
-function loadClasses() {
-    fetch('/api/get_classes')
-        .then(response => response.json())
-        .then(data => {
-            const classSelect = document.querySelector('#class');
-            classSelect.innerHTML = ''; // Limpiar opciones previas
-            console.log(data); // Verificar datos en consola
-
-            data.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.class_name;
-                classSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error al cargar las clases:', error));
-}
-
-// Función para mostrar el formulario de creación de party
-function showCreatePartyForm() {
-    const partyFormContainer = document.querySelector('#party-form-container');
-    partyFormContainer.style.display = 'block'; // Mostrar el formulario
-    
-    // Obtener personajes y llenar el select
-    fetch('/api/get_characters')
-        .then(response => response.json())
-        .then(data => {
-            const select = document.querySelector('#party-members');
-            select.innerHTML = ''; // Limpiar opciones previas
-
-            data.forEach(character => {
-                const option = document.createElement('option');
-                option.value = character[9]; // ID del personaje
-                option.textContent = `${character[0]} - Nivel ${character[2]}`; // Nombre y nivel
-                select.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error al cargar personajes para el party:', error));
-}
-
-// Función para crear un party
-document.querySelector('#create-party-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const partyName = document.querySelector('#party-name').value;
-    const selectedCharacters = Array.from(document.querySelector('#party-members').selectedOptions).map(option => option.value);
-
-    fetch('/api/add_party', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ party_name: partyName, character_ids: selectedCharacters })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('Party creado exitosamente!');
-            location.reload();
-        }
-    })
-    .catch(error => console.error('Error al crear el party:', error));
-});
-
-// Función para cargar y mostrar los parties
-function loadParties() {
-    fetch('/api/get_parties')
-    .then(response => response.json())
-    .then(data => {
-        const partiesContainer = document.querySelector('#parties-container');
-        partiesContainer.innerHTML = ''; // Limpiar contenido previo
-
-        data.forEach(party => {
-            const partyBox = document.createElement('div');
-            partyBox.classList.add('party-box');
-            partyBox.innerHTML = `
-                <h3>${party.party_name}</h3>
-                <ul>
-                    ${party.members.map(member => `<li>${member.name} (Nivel ${member.level})</li>`).join('')}
-                </ul>
-                <button onclick="deleteParty(${party.id})">Eliminar Party</button>
-            `;
-            partiesContainer.appendChild(partyBox);
-        });
-    });
-}
-
-// Función para eliminar un party
-function deleteParty(partyId) {
-    fetch(`/api/delete_party/${partyId}`, {
-        method: 'DELETE'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            loadParties(); // Recargar la lista de parties después de eliminar
-        }
-    })
-    .catch(error => console.error('Error al eliminar party:', error));
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('modal');
-    const openModalButton = document.getElementById('open-modal-button');
-    const closeModalButton = document.getElementById('close-modal-button');
-
-    // Abrir el modal al hacer clic en el botón "Agregar Personaje"
-    openModalButton.addEventListener('click', () => {
-        modal.style.display = 'flex';
-    });
-
-    // Cerrar el modal al hacer clic en la "X"
-    closeModalButton.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-
-    // Cerrar el modal al hacer clic fuera del contenido del modal
-    window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-});
-
-// Función para agregar un personaje
-document.querySelector('#add-character-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evita el envío predeterminado del formulario
-
+// Agregar un personaje
+function addCharacter() {
     const characterData = {
         name: document.querySelector('#name').value,
         class_id: document.querySelector('#class').value,
@@ -183,27 +151,28 @@ document.querySelector('#add-character-form').addEventListener('submit', functio
 
     fetch('/api/add_character', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(characterData)
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
             alert('Personaje agregado exitosamente!');
-            loadCharacters(); // Recargar la lista de personajes después de agregar
+            loadCharacters();
+            document.getElementById('modal').style.display = 'none';
         }
     })
     .catch(error => console.error('Error al agregar personaje:', error));
-});
+}
 
-
-// Funcion para editar los personajes
-function editCharacter(characterId) {
+// Editar un personaje (cargar datos en el formulario)
+window.editCharacter = function(characterId) {
     fetch(`/api/get_character/${characterId}`)
         .then(response => response.json())
         .then(character => {
+            isEditing = true;
+            currentCharacterId = characterId;
+
             document.getElementById('name').value = character.name;
             document.getElementById('class').value = character.class_id;
             document.getElementById('level').value = character.level;
@@ -215,18 +184,15 @@ function editCharacter(characterId) {
             document.getElementById('is_party_master').checked = character.is_party_master;
             document.getElementById('is_mule').checked = character.is_mule;
 
-            // Mostrar el modal para editar
-            modal.style.display = 'flex';
+            document.querySelector('#modal h2').textContent = 'Modificar Personaje';
+            document.querySelector('#add-character-form button[type="submit"]').textContent = 'Guardar Cambios';
 
-            // Cambiar el comportamiento del formulario para actualizar el personaje
-            document.querySelector('#add-character-form').onsubmit = function(event) {
-                event.preventDefault();
-                updateCharacter(characterId);
-            };
+            document.getElementById('modal').style.display = 'flex';
         })
         .catch(error => console.error('Error al obtener datos del personaje:', error));
 }
 
+// Actualizar un personaje existente
 function updateCharacter(characterId) {
     const characterData = {
         name: document.querySelector('#name').value,
@@ -243,24 +209,23 @@ function updateCharacter(characterId) {
 
     fetch(`/api/update_character/${characterId}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(characterData)
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
             alert('Personaje actualizado correctamente.');
-            loadCharacters(); // Recargar la lista de personajes después de actualizar
-            modal.style.display = 'none'; // Cerrar el modal
+            loadCharacters();
+            document.getElementById('modal').style.display = 'none';
+            isEditing = false;
         }
     })
     .catch(error => console.error('Error al actualizar personaje:', error));
 }
 
-// Funcion para eliminar personaje
-function deleteCharacter(characterId) {
+// Eliminar un personaje
+window.deleteCharacter = function(characterId) {
     fetch(`/api/delete_character/${characterId}`, {
         method: 'DELETE'
     })
@@ -268,9 +233,162 @@ function deleteCharacter(characterId) {
     .then(data => {
         if (data.status === 'success') {
             alert('Personaje eliminado correctamente.');
-            loadCharacters(); // Recargar la lista de personajes después de eliminar
+            loadCharacters();
         }
     })
     .catch(error => console.error('Error al eliminar personaje:', error));
 }
 
+// ================================
+// Funciones - CRUD de Parties
+// ================================
+
+// Cargar y mostrar los parties
+function loadParties() {
+    fetch('/api/get_parties')
+        .then(response => response.json())
+        .then(data => {
+            const partiesContainer = document.querySelector('#parties-container');
+            partiesContainer.innerHTML = '';
+            data.forEach(party => {
+                const partyBox = document.createElement('div');
+                partyBox.classList.add('party-box');
+                partyBox.innerHTML = `
+                    <h3>${party.party_name}</h3>
+                    <ul>
+                        ${party.members.map(member => `
+                            <li>
+                                ${member.name} - ${member.class_name} (Nivel ${member.level})
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <div class="party-actions">
+                        <button class="edit-party-button" onclick="editParty(${party.id})">Editar</button>
+                        <button class="delete-party-button" onclick="deleteParty(${party.id})">Eliminar</button>
+                    </div>
+                `;
+                partiesContainer.appendChild(partyBox);
+            });
+        });
+}
+
+// Crear un nuevo party
+function createParty(partyData) {
+    fetch('/api/create_party', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(partyData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Party creado exitosamente!');
+            loadParties(); // Recargar la lista de parties después de crear
+            document.getElementById('party-modal').style.display = 'none'; // Cerrar modal
+            resetPartyForm(); // Restablecer el formulario de party
+        } else {
+            console.error('Error al crear el party:', data.message);
+            alert(`Error al crear el party: ${data.message}`);
+        }
+    })
+    .catch(error => console.error('Error al crear el party:', error));
+}
+
+
+// Actualizar un party existente
+function updateParty(partyId, partyData) {
+    fetch(`/api/update_party/${partyId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(partyData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Party actualizado exitosamente!');
+            loadParties();
+            document.getElementById('party-modal').style.display = 'none';
+            isEditingParty = false;
+            currentPartyId = null;
+            resetPartyForm();
+        }
+    })
+    .catch(error => console.error('Error al actualizar el party:', error));
+}
+
+// Eliminar un party
+window.deleteParty = function(partyId) {
+    fetch(`/api/delete_party/${partyId}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            loadParties();
+        } else {
+            alert('Error al eliminar el party.');
+        }
+    })
+    .catch(error => console.error('Error al eliminar party:', error));
+}
+
+// ================================
+// Funciones Auxiliares
+// ================================
+
+// Cargar las clases y llenar el select correspondiente
+function loadClasses() {
+    fetch('/api/get_classes')
+        .then(response => response.json())
+        .then(data => {
+            const classSelect = document.querySelector('#class');
+            classSelect.innerHTML = '';
+            data.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.class_name;
+                classSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al cargar las clases:', error));
+}
+
+// Cargar los personajes para el select del formulario de party
+function loadPartyMembers() {
+    fetch('/api/get_characters')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.querySelector('#party-members');
+            select.innerHTML = '';
+            data.forEach(character => {
+                const option = document.createElement('option');
+                option.value = character[9];
+                option.textContent = `${character[0]} - Nivel ${character[2]}`;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al cargar personajes para el party:', error));
+}
+
+// Restablecer el formulario de personajes
+function resetCharacterForm() {
+    document.querySelector('#add-character-form').reset();
+    document.querySelector('#modal h2').textContent = 'Agregar Personaje';
+    document.querySelector('#add-character-form button[type="submit"]').textContent = 'Agregar Personaje';
+}
+
+// Restablecer el formulario de party
+function resetPartyForm() {
+    document.querySelector('#create-party-form').reset();
+    const partyMembersSelect = document.getElementById('party-members');
+    Array.from(partyMembersSelect.options).forEach(option => {
+        option.selected = false;
+    });
+    document.querySelector('#party-modal h2').textContent = 'Crear Party';
+    document.querySelector('#create-party-form button[type="submit"]').textContent = 'Crear Party';
+}

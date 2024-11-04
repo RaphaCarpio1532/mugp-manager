@@ -31,6 +31,11 @@ header h1 {
 /* =============================
    Principal
 ============================= */
+h2 {
+    text-align: center;
+}
+
+
 main {
     width: 100%;
     max-width: 1200px;
@@ -42,6 +47,7 @@ main {
 ============================= */
 #characters-list-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%; /* Ajuste para que ocupe todo el ancho de la pantalla */
@@ -49,6 +55,7 @@ main {
 
 .container {
     width: 90%;
+    margin: 0 auto;
     background: rgba(0, 0, 0, 0.8);
     padding: 2.5rem;
     border-radius: 12px;
@@ -121,7 +128,6 @@ button:hover {
 ============================= */
 table {
     width: 100%;
-    max-width: 100%;
     margin: 0 auto;
     border-collapse: separate;
     border-spacing: 0.3rem 0;
@@ -216,4 +222,89 @@ table thead tr {
 
 .delete-button:hover {
     background-color: #e53935;
+}
+
+/* =============================
+   Estilos para Parties
+============================= */
+.parties-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+}
+
+.party-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    width: 300px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    text-align: center;
+    position: relative;
+}
+
+.party-box h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.party-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.party-box li {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+.party-box .party-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.party-box .party-actions button {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+.party-box .edit-party-button {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+.party-box .delete-party-button {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.party-box .edit-party-button:hover {
+    background-color: #45a049;
+}
+
+.party-box .delete-party-button:hover {
+    background-color: #e53935;
+}
+ 
+/* Efecto de brillo */
+.party-box::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, rgba(255,255,255,0.25), rgba(255,255,255,0));
+    border-radius: 15px;
+    pointer-events: none;
 }
