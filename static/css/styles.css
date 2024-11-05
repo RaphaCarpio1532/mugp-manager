@@ -326,3 +326,27 @@ table th:nth-child(2), table td:nth-child(2) {
 }
 
 /* Ajusta los porcentajes según tus necesidades */
+/* Estilos para la barra de progreso */
+.progress-bar-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 20px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #4caf50; /* Color de la barra de progreso */
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+/* Estilos para los checkboxes de personajes */
+.character-checkbox {
+    margin-bottom: 5px;
+}
+
+.character-checkbox input[type="checkbox"] {
+    margin-right: 10px;
+}

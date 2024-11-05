@@ -16,20 +16,34 @@ function loadPartyMembers() {
     return fetch('/api/get_characters')
         .then(response => response.json())
         .then(data => {
-            const select = document.querySelector('#party-members');
-            select.innerHTML = '';
+            const container = document.querySelector('#party-members-container');
+            container.innerHTML = ''; // Limpia el contenedor
+
             data.forEach(character => {
-                const option = document.createElement('option');
-                option.value = character[9];  // El ID del personaje
-                option.textContent = `${character[0]} - Nivel ${character[2]}`;  // Nombre y nivel
-                select.appendChild(option);
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = character[9]; // ID del personaje
+                checkbox.id = `character-${character[9]}`;
+                checkbox.name = 'party-members';
+
+                const label = document.createElement('label');
+                label.htmlFor = `character-${character[9]}`;
+                label.textContent = `${character[0]} - Nivel ${character[2]}`; // Nombre y nivel
+
+                const div = document.createElement('div');
+                div.classList.add('character-checkbox');
+                div.appendChild(checkbox);
+                div.appendChild(label);
+
+                container.appendChild(div);
             });
         })
         .catch(error => {
             console.error('Error al cargar personajes para el party:', error);
-            throw error;  // Re-lanzamos el error para manejarlo en el llamado
+            throw error;
         });
 }
+
 
 // Restablecer el formulario de party
 function resetPartyForm() {
@@ -154,15 +168,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // ================================
     document.querySelector('#create-party-form').addEventListener('submit', function(event) {
         event.preventDefault();
-
+    
         const partyName = document.querySelector('#party-name').value;
-        const selectedCharacters = Array.from(document.querySelector('#party-members').selectedOptions).map(option => option.value);
-
+        const selectedCharacters = Array.from(document.querySelectorAll('#party-members-container input[type="checkbox"]:checked'))
+            .map(checkbox => checkbox.value);
+    
         const partyData = {
             party_name: partyName,
             character_ids: selectedCharacters
         };
-
+    
         // Lógica para crear o actualizar un party según el estado (isEditingParty)
         if (isEditingParty) {
             updateParty(currentPartyId, partyData);
@@ -170,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
             createParty(partyData);
         }
     });
-});
+});   
 
 // ================================
 // Funciones - CRUD de Personajes
@@ -178,6 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ================================
 // Cargar y mostrar los personajes en la tabla
 // ================================
+
 function loadCharacters() {
     fetch('/api/get_characters')
         .then(response => response.json())
@@ -185,11 +201,19 @@ function loadCharacters() {
             const charactersTable = document.querySelector('#characters-table tbody');
             charactersTable.innerHTML = '';
             data.forEach(character => {
+                // Calcula el porcentaje del nivel
+                const levelPercentage = (character[2] / 1650) * 100; // character[2] es el nivel
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${character[0]}</td> <!-- Nombre -->
                     <td>${character[1]}</td> <!-- Clase -->
-                    <td>${character[2]}</td> <!-- Nivel Actual -->
+                    <td>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: ${levelPercentage}%;"></div>
+                        </div>
+                        <div style="text-align: center;">Nivel ${character[2]}</div>
+                    </td>
                     <td>${character[3]}</td> <!-- Comprar -->
                     <td>${character[4]}</td> <!-- Vender -->
                     <td>
@@ -202,6 +226,7 @@ function loadCharacters() {
         })
         .catch(error => console.error('Error al cargar personajes:', error));
 }
+
 
 // ================================
 // Agregar un personaje
@@ -351,7 +376,16 @@ function loadParties() {
 // ================================
 // Crear un nuevo party
 // ================================
-function createParty(partyData) {
+function createParty() {
+    const partyName = document.querySelector('#party-name').value;
+    const selectedCharacters = Array.from(document.querySelectorAll('#party-members-container input[type="checkbox"]:checked'))
+        .map(checkbox => checkbox.value);
+
+    const partyData = {
+        party_name: partyName,
+        character_ids: selectedCharacters
+    };
+
     fetch('/api/create_party', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -379,28 +413,26 @@ function createParty(partyData) {
 
 
 
+
 // ================================
 // Función para editar un Party
 // ================================
 window.editParty = function(partyId) {
-    // Obtener los datos del party
     fetch(`/api/get_party/${partyId}`)
         .then(response => response.json())
         .then(party => {
-            // Cargar los personajes en el select primero
             loadPartyMembers()
                 .then(() => {
-                    // Configuración para editar el party existente
                     isEditingParty = true;
                     currentPartyId = partyId;
 
                     // Llenar el formulario del modal con los datos del party
                     document.getElementById('party-name').value = party.party_name;
 
-                    // Seleccionar los miembros actuales en el select
-                    const partyMembersSelect = document.getElementById('party-members');
-                    Array.from(partyMembersSelect.options).forEach(option => {
-                        option.selected = party.members.some(member => member.id === parseInt(option.value));
+                    // Marcar los checkboxes de los miembros actuales
+                    const checkboxes = document.querySelectorAll('#party-members-container input[type="checkbox"]');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = party.members.some(member => member.id == checkbox.value);
                     });
 
                     // Cambiar el título y el texto del botón
@@ -416,7 +448,9 @@ window.editParty = function(partyId) {
 };
 
 
+// ================================
 // Actualizar un party existente
+// ================================
 function updateParty(partyId, partyData) {
     fetch(`/api/update_party/${partyId}`, {
         method: 'PUT',
@@ -441,7 +475,9 @@ function updateParty(partyId, partyData) {
     .catch(error => console.error('Error al actualizar el party:', error));
 }
 
+// ================================
 // Eliminar un party
+// ================================
 window.deleteParty = function(partyId) {
     fetch(`/api/delete_party/${partyId}`, {
         method: 'DELETE'
