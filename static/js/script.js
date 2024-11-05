@@ -187,15 +187,11 @@ function loadCharacters() {
             data.forEach(character => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${character[0]}</td>
-                    <td>${character[1]}</td>
-                    <td>${character[2]}</td>
-                    <td>${character[3]}</td>
-                    <td>${character[4]}</td>
-                    <td>${character[5]}</td>
-                    <td>${character[6]}</td>
-                    <td>${character[7] ? 'Sí' : 'No'}</td>
-                    <td>${character[8] ? 'Sí' : 'No'}</td>
+                    <td>${character[0]}</td> <!-- Nombre -->
+                    <td>${character[1]}</td> <!-- Clase -->
+                    <td>${character[2]}</td> <!-- Nivel Actual -->
+                    <td>${character[3]}</td> <!-- Comprar -->
+                    <td>${character[4]}</td> <!-- Vender -->
                     <td>
                         <button class="edit-button" onclick="editCharacter(${character[9]})">Modificar</button>
                         <button class="delete-button" onclick="deleteCharacter(${character[9]})">Eliminar</button>
@@ -206,6 +202,7 @@ function loadCharacters() {
         })
         .catch(error => console.error('Error al cargar personajes:', error));
 }
+
 // ================================
 // Agregar un personaje
 // ================================

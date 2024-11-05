@@ -308,3 +308,21 @@ table thead tr {
     border-radius: 15px;
     pointer-events: none;
 }
+/* Estilos para el botón "Crear Party" */
+#open-party-modal-button {
+    background-color: #6a5acd;
+    color: #ffffff;
+    padding: 0.8rem 2rem;
+    margin: 1rem auto;
+    display: block;
+    font-size: 1rem;
+}
+table th:nth-child(1), table td:nth-child(1) {
+    width: 20%;
+}
+
+table th:nth-child(2), table td:nth-child(2) {
+    width: 15%;
+}
+
+/* Ajusta los porcentajes según tus necesidades */
