@@ -1,3 +1,4 @@
+
 // ================================
 // Variables Globales y Estado
 // ================================
@@ -5,6 +6,16 @@ let isEditing = false;             // Indica si se está editando un personaje
 let currentCharacterId = null;     // ID del personaje actual en edición
 let isEditingParty = false;        // Indica si se está editando un party
 let currentPartyId = null;         // ID del party actual en edición
+
+let charactersData = []; // Para almacenar los datos de personajes cargados
+let sortDirection = {
+    name: 'asc',
+    class: 'asc',
+    level: 'asc',
+    to_buy: 'asc',
+    to_sell: 'asc'
+};
+
 
 const partyModal = document.getElementById('party-modal');  // Referencia global al modal de parties
 // ================================
@@ -198,34 +209,12 @@ function loadCharacters() {
     fetch('/api/get_characters')
         .then(response => response.json())
         .then(data => {
-            const charactersTable = document.querySelector('#characters-table tbody');
-            charactersTable.innerHTML = '';
-            data.forEach(character => {
-                // Calcula el porcentaje del nivel
-                const levelPercentage = (character[2] / 1650) * 100; // character[2] es el nivel
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${character[0]}</td> <!-- Nombre -->
-                    <td>${character[1]}</td> <!-- Clase -->
-                    <td>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: ${levelPercentage}%;"></div>
-                        </div>
-                        <div style="text-align: center;">Nivel ${character[2]}</div>
-                    </td>
-                    <td>${character[3]}</td> <!-- Comprar -->
-                    <td>${character[4]}</td> <!-- Vender -->
-                    <td>
-                        <button class="edit-button" onclick="editCharacter(${character[9]})">Modificar</button>
-                        <button class="delete-button" onclick="deleteCharacter(${character[9]})">Eliminar</button>
-                    </td>
-                `;
-                charactersTable.appendChild(row);
-            });
+            charactersData = data; // Almacena los datos en la variable global
+            displayCharacters(charactersData); // Llama a la función para mostrar los datos en la tabla
         })
         .catch(error => console.error('Error al cargar personajes:', error));
 }
+
 
 
 // ================================
@@ -494,4 +483,85 @@ window.deleteParty = function(partyId) {
 }
 
 
+
+// ===========================
+// Funciones de orden 
+// ==========================
+
+
+// ===========================
+// Funcione para renderizar los datos en la tabla 
+// ==========================
+function displayCharacters(data) {
+    const charactersTable = document.querySelector('#characters-table tbody');
+    charactersTable.innerHTML = '';
+    data.forEach(character => {
+        const levelPercentage = (character[2] / 1650) * 100;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${character[0]}</td> <!-- Nombre -->
+            <td>${character[1]}</td> <!-- Clase -->
+            <td>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: ${levelPercentage}%;"></div>
+                </div>
+                <div style="text-align: center;">Nivel ${character[2]}</div>
+            </td>
+            <td>${character[3]}</td> <!-- Comprar -->
+            <td>${character[4]}</td> <!-- Vender -->
+            <td>
+                <button class="edit-button" onclick="editCharacter(${character[9]})">Modificar</button>
+                <button class="delete-button" onclick="deleteCharacter(${character[9]})">Eliminar</button>
+            </td>
+        `;
+        charactersTable.appendChild(row);
+    });
+}
+
+
+// ===========================
+// Funcione para Ordenar los datos
+// ==========================
+function sortCharacters(column) {
+    // Cambia la dirección de orden según el último clic
+    sortDirection[column] = sortDirection[column] === 'asc' ? 'desc' : 'asc';
+
+    // Crea una copia de charactersData para no modificar el original
+    let sortedData = [...charactersData];
+
+    // Ordena los datos en sortedData
+    sortedData.sort((a, b) => {
+        let aValue, bValue;
+
+        if (column === 'level') {
+            // Ordenar por nivel como número
+            aValue = a[2];
+            bValue = b[2];
+        } else if (column === 'name') {
+            aValue = a[0];
+            bValue = b[0];
+        } else if (column === 'class') {
+            aValue = a[1];
+            bValue = b[1];
+        } else if (column === 'to_buy') {
+            aValue = a[3] || '';
+            bValue = b[3] || '';
+        } else if (column === 'to_sell') {
+            aValue = a[4] || '';
+            bValue = b[4] || '';
+        }
+
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            return sortDirection[column] === 'asc' ? aValue - bValue : bValue - aValue;
+        } else {
+            return sortDirection[column] === 'asc'
+                ? aValue.localeCompare(bValue)
+                : bValue.localeCompare(aValue);
+        }
+    });
+
+    // Actualiza la tabla con el orden aplicado
+    displayCharacters(sortedData);
+}
 

@@ -21,11 +21,40 @@ header {
     text-align: center;
 }
 
+/* Estilo del Título con Efecto 3D y Resplandor */
 header h1 {
     font-size: 4rem;
     font-weight: 700;
     margin: 0;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+    text-shadow:
+        0 1px 0 #151515,
+        0 2px 0 #151515,
+        0 3px 0 #151515,
+        0 4px 0 #151515,
+        0 5px 0 #151515,
+        0 6px 0 transparent,
+        0 7px 0 transparent,
+        0 8px 0 transparent,
+        0 9px 0 transparent,
+        0 10px 10px rgba(0, 0, 0, 0.4);
+    position: relative;
+    color: #ffffff;
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
+}
+
+header h1:hover {
+    transform: translateY(-5px);
+    text-shadow:
+        0 1px 0 hsl(297, 100%, 50%),
+        0 2px 0 hsl(297, 100%, 50%),
+        0 3px 0 hsl(297, 100%, 50%),
+        0 4px 0 hsl(297, 100%, 50%),
+        0 5px 0 hsl(297, 100%, 50%),
+        0 6px 0 hsl(297, 100%, 50%),
+        0 7px 0 hsl(297, 100%, 50%),
+        0 8px 0 hsl(297, 100%, 50%),
+        0 9px 0 hsl(297, 100%, 50%),
+        0 10px 10px hsl(297, 87%, 24%);
 }
 
 /* =============================
@@ -34,7 +63,6 @@ header h1 {
 h2 {
     text-align: center;
 }
-
 
 main {
     width: 100%;
@@ -104,23 +132,31 @@ button {
     border-radius: 25px;
     font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     margin-top: 1rem;
 }
 
 button:hover {
     background-color: #8d4ea7;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    transform: translateY(-5px) scale(1.05);
 }
 
-#open-modal-button {
+/* Botones específicos */
+#open-modal-button,
+#open-party-modal-button {
     background-color: #6a5acd;
     color: #ffffff;
     padding: 0.8rem 2rem;
     margin: 1rem auto;
     display: block;
     font-size: 1rem;
+}
+
+#open-modal-button:hover,
+#open-party-modal-button:hover {
+    background-color: #8d4ea7;
 }
 
 /* =============================
@@ -206,6 +242,7 @@ table thead tr {
     font-weight: bold;
     cursor: pointer;
     color: white;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .edit-button {
@@ -218,10 +255,14 @@ table thead tr {
 
 .edit-button:hover {
     background-color: #45a049;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 
 .delete-button:hover {
     background-color: #e53935;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 
 /* =============================
@@ -245,6 +286,27 @@ table thead tr {
     color: #ffffff;
     text-align: center;
     position: relative;
+    overflow: hidden;
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.party-box:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Efecto hover para elementos impares y pares */
+.parties-container .party-box:nth-child(odd):hover {
+    transform: perspective(600px) rotateY(-5deg) translateX(10px) translateY(-10px);
+}
+
+.parties-container .party-box:nth-child(even):hover {
+    transform: perspective(600px) rotateY(5deg) translateX(-10px) translateY(-10px);
+}
+
+/* Hover con resplandor y efecto 3D */
+.party-box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 0 20px 5px rgba(255, 223, 0, 0.6); /* Glow amarillo */
 }
 
 .party-box h3 {
@@ -276,38 +338,30 @@ table thead tr {
     font-weight: bold;
     cursor: pointer;
     border: none;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    color: #fff;
 }
 
 .party-box .edit-party-button {
     background-color: #4caf50;
-    color: #fff;
 }
 
 .party-box .delete-party-button {
     background-color: #f44336;
-    color: #fff;
 }
 
 .party-box .edit-party-button:hover {
     background-color: #45a049;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 
 .party-box .delete-party-button:hover {
     background-color: #e53935;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
- 
-/* Efecto de brillo */
-.party-box::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, rgba(255,255,255,0.25), rgba(255,255,255,0));
-    border-radius: 15px;
-    pointer-events: none;
-}
+
 /* Estilos para el botón "Crear Party" */
 #open-party-modal-button {
     background-color: #6a5acd;
@@ -317,6 +371,14 @@ table thead tr {
     display: block;
     font-size: 1rem;
 }
+
+#open-party-modal-button:hover {
+    background-color: #8d4ea7;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Ajuste de las columnas de la tabla */
 table th:nth-child(1), table td:nth-child(1) {
     width: 20%;
 }
@@ -325,7 +387,6 @@ table th:nth-child(2), table td:nth-child(2) {
     width: 15%;
 }
 
-/* Ajusta los porcentajes según tus necesidades */
 /* Estilos para la barra de progreso */
 .progress-bar-container {
     width: 100%;
