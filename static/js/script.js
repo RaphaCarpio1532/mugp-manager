@@ -6,6 +6,78 @@ let currentCharacterId = null;     // ID del personaje actual en edición
 let isEditingParty = false;        // Indica si se está editando un party
 let currentPartyId = null;         // ID del party actual en edición
 
+const partyModal = document.getElementById('party-modal');  // Referencia global al modal de parties
+// ================================
+// Funciones Auxiliares
+// ================================
+
+//cargar los personajes para el select del formulario de party
+function loadPartyMembers() {
+    return fetch('/api/get_characters')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.querySelector('#party-members');
+            select.innerHTML = '';
+            data.forEach(character => {
+                const option = document.createElement('option');
+                option.value = character[9];  // El ID del personaje
+                option.textContent = `${character[0]} - Nivel ${character[2]}`;  // Nombre y nivel
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error al cargar personajes para el party:', error);
+            throw error;  // Re-lanzamos el error para manejarlo en el llamado
+        });
+}
+
+// Restablecer el formulario de party
+function resetPartyForm() {
+    document.querySelector('#create-party-form').reset();
+    const partyMembersSelect = document.getElementById('party-members');
+    Array.from(partyMembersSelect.options).forEach(option => {
+        option.selected = false;
+    });
+    document.querySelector('#party-modal h2').textContent = 'Crear Party';
+    document.querySelector('#create-party-form button[type="submit"]').textContent = 'Crear Party';
+}
+
+// Cargar las clases y llenar el select correspondiente
+function loadClasses() {
+    fetch('/api/get_classes')
+        .then(response => response.json())
+        .then(data => {
+            const classSelect = document.querySelector('#class');
+            classSelect.innerHTML = '';
+            data.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.class_name;
+                classSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al cargar las clases:', error));
+}
+
+// Restablecer el formulario de personajes
+function resetCharacterForm() {
+    document.querySelector('#add-character-form').reset();
+    document.querySelector('#modal h2').textContent = 'Agregar Personaje';
+    document.querySelector('#add-character-form button[type="submit"]').textContent = 'Agregar Personaje';
+}
+
+// Restablecer el formulario de party
+function resetPartyForm() {
+    document.querySelector('#create-party-form').reset();
+    const partyMembersSelect = document.getElementById('party-members');
+    Array.from(partyMembersSelect.options).forEach(option => {
+        option.selected = false;
+    });
+    document.querySelector('#party-modal h2').textContent = 'Crear Party';
+    document.querySelector('#create-party-form button[type="submit"]').textContent = 'Crear Party';
+}
+
+
 // ================================
 // Inicialización del DOM
 // ================================
@@ -16,7 +88,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('modal');
     const openModalButton = document.getElementById('open-modal-button');
     const closeModalButton = document.getElementById('close-modal-button');
-    const partyModal = document.getElementById('party-modal');
     const openPartyModalButton = document.getElementById('open-party-modal-button');
     const closePartyModalButton = document.getElementById('close-party-modal-button');
 
@@ -45,14 +116,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ================================
+  // ================================
     // Event Listeners - Modal de Parties
     // ================================
     openPartyModalButton.addEventListener('click', () => {
         isEditingParty = false;
         currentPartyId = null;
         resetPartyForm();
-        loadPartyMembers();
+        loadPartyMembers(); // Cargar miembros disponibles antes de abrir el modal
         partyModal.style.display = 'flex';
     });
 
@@ -66,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ================================
+  // ================================
     // Event Listener - Formulario de Personaje
     // ================================
     document.querySelector('#add-character-form').addEventListener('submit', function(event) {
@@ -78,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ================================
+// ================================
     // Event Listener - Formulario de Party
     // ================================
     document.querySelector('#create-party-form').addEventListener('submit', function(event) {
@@ -92,6 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
             character_ids: selectedCharacters
         };
 
+        // Lógica para crear o actualizar un party según el estado (isEditingParty)
         if (isEditingParty) {
             updateParty(currentPartyId, partyData);
         } else {
@@ -103,8 +175,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // ================================
 // Funciones - CRUD de Personajes
 // ================================
-
+// ================================
 // Cargar y mostrar los personajes en la tabla
+// ================================
 function loadCharacters() {
     fetch('/api/get_characters')
         .then(response => response.json())
@@ -133,8 +206,9 @@ function loadCharacters() {
         })
         .catch(error => console.error('Error al cargar personajes:', error));
 }
-
+// ================================
 // Agregar un personaje
+// ================================
 function addCharacter() {
     const characterData = {
         name: document.querySelector('#name').value,
@@ -164,8 +238,9 @@ function addCharacter() {
     })
     .catch(error => console.error('Error al agregar personaje:', error));
 }
-
+// ================================
 // Editar un personaje (cargar datos en el formulario)
+// ================================
 window.editCharacter = function(characterId) {
     fetch(`/api/get_character/${characterId}`)
         .then(response => response.json())
@@ -191,8 +266,9 @@ window.editCharacter = function(characterId) {
         })
         .catch(error => console.error('Error al obtener datos del personaje:', error));
 }
-
+// ================================
 // Actualizar un personaje existente
+// ================================
 function updateCharacter(characterId) {
     const characterData = {
         name: document.querySelector('#name').value,
@@ -223,8 +299,9 @@ function updateCharacter(characterId) {
     })
     .catch(error => console.error('Error al actualizar personaje:', error));
 }
-
+// ================================
 // Eliminar un personaje
+// ================================
 window.deleteCharacter = function(characterId) {
     fetch(`/api/delete_character/${characterId}`, {
         method: 'DELETE'
@@ -242,8 +319,9 @@ window.deleteCharacter = function(characterId) {
 // ================================
 // Funciones - CRUD de Parties
 // ================================
-
+// ================================
 // Cargar y mostrar los parties
+// ================================
 function loadParties() {
     fetch('/api/get_parties')
         .then(response => response.json())
@@ -272,7 +350,10 @@ function loadParties() {
         });
 }
 
+
+// ================================
 // Crear un nuevo party
+// ================================
 function createParty(partyData) {
     fetch('/api/create_party', {
         method: 'POST',
@@ -300,22 +381,64 @@ function createParty(partyData) {
 }
 
 
+
+// ================================
+// Función para editar un Party
+// ================================
+window.editParty = function(partyId) {
+    // Obtener los datos del party
+    fetch(`/api/get_party/${partyId}`)
+        .then(response => response.json())
+        .then(party => {
+            // Cargar los personajes en el select primero
+            loadPartyMembers()
+                .then(() => {
+                    // Configuración para editar el party existente
+                    isEditingParty = true;
+                    currentPartyId = partyId;
+
+                    // Llenar el formulario del modal con los datos del party
+                    document.getElementById('party-name').value = party.party_name;
+
+                    // Seleccionar los miembros actuales en el select
+                    const partyMembersSelect = document.getElementById('party-members');
+                    Array.from(partyMembersSelect.options).forEach(option => {
+                        option.selected = party.members.some(member => member.id === parseInt(option.value));
+                    });
+
+                    // Cambiar el título y el texto del botón
+                    document.querySelector('#party-modal h2').textContent = 'Modificar Party';
+                    document.querySelector('#create-party-form button[type="submit"]').textContent = 'Guardar Cambios';
+
+                    // Mostrar el modal para editar
+                    document.getElementById('party-modal').style.display = 'flex';
+                })
+                .catch(error => console.error('Error al cargar personajes para el select:', error));
+        })
+        .catch(error => console.error('Error al obtener datos del party:', error));
+};
+
+
 // Actualizar un party existente
 function updateParty(partyId, partyData) {
     fetch(`/api/update_party/${partyId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify(partyData)
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
             alert('Party actualizado exitosamente!');
-            loadParties();
+            loadParties(); // Recargar la lista de parties después de actualizar
             document.getElementById('party-modal').style.display = 'none';
-            isEditingParty = false;
+            isEditingParty = false; // Restablecer el estado
             currentPartyId = null;
-            resetPartyForm();
+            resetPartyForm(); // Restablecer el formulario
+        } else {
+            console.error('Error al actualizar el party:', data.message);
         }
     })
     .catch(error => console.error('Error al actualizar el party:', error));
@@ -337,58 +460,5 @@ window.deleteParty = function(partyId) {
     .catch(error => console.error('Error al eliminar party:', error));
 }
 
-// ================================
-// Funciones Auxiliares
-// ================================
 
-// Cargar las clases y llenar el select correspondiente
-function loadClasses() {
-    fetch('/api/get_classes')
-        .then(response => response.json())
-        .then(data => {
-            const classSelect = document.querySelector('#class');
-            classSelect.innerHTML = '';
-            data.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.class_name;
-                classSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error al cargar las clases:', error));
-}
 
-// Cargar los personajes para el select del formulario de party
-function loadPartyMembers() {
-    fetch('/api/get_characters')
-        .then(response => response.json())
-        .then(data => {
-            const select = document.querySelector('#party-members');
-            select.innerHTML = '';
-            data.forEach(character => {
-                const option = document.createElement('option');
-                option.value = character[9];
-                option.textContent = `${character[0]} - Nivel ${character[2]}`;
-                select.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error al cargar personajes para el party:', error));
-}
-
-// Restablecer el formulario de personajes
-function resetCharacterForm() {
-    document.querySelector('#add-character-form').reset();
-    document.querySelector('#modal h2').textContent = 'Agregar Personaje';
-    document.querySelector('#add-character-form button[type="submit"]').textContent = 'Agregar Personaje';
-}
-
-// Restablecer el formulario de party
-function resetPartyForm() {
-    document.querySelector('#create-party-form').reset();
-    const partyMembersSelect = document.getElementById('party-members');
-    Array.from(partyMembersSelect.options).forEach(option => {
-        option.selected = false;
-    });
-    document.querySelector('#party-modal h2').textContent = 'Crear Party';
-    document.querySelector('#create-party-form button[type="submit"]').textContent = 'Crear Party';
-}
