@@ -59,13 +59,17 @@ function loadPartyMembers() {
 // Restablecer el formulario de party
 function resetPartyForm() {
     document.querySelector('#create-party-form').reset();
-    const partyMembersSelect = document.getElementById('party-members');
-    Array.from(partyMembersSelect.options).forEach(option => {
-        option.selected = false;
+
+    // Desmarcar todos los checkboxes
+    const checkboxes = document.querySelectorAll('#party-members-container input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
     });
+
     document.querySelector('#party-modal h2').textContent = 'Crear Party';
     document.querySelector('#create-party-form button[type="submit"]').textContent = 'Crear Party';
 }
+
 
 // Cargar las clases y llenar el select correspondiente
 function loadClasses() {
@@ -91,16 +95,6 @@ function resetCharacterForm() {
     document.querySelector('#add-character-form button[type="submit"]').textContent = 'Agregar Personaje';
 }
 
-// Restablecer el formulario de party
-function resetPartyForm() {
-    document.querySelector('#create-party-form').reset();
-    const partyMembersSelect = document.getElementById('party-members');
-    Array.from(partyMembersSelect.options).forEach(option => {
-        option.selected = false;
-    });
-    document.querySelector('#party-modal h2').textContent = 'Crear Party';
-    document.querySelector('#create-party-form button[type="submit"]').textContent = 'Crear Party';
-}
 
 
 // ================================
@@ -147,10 +141,15 @@ document.addEventListener('DOMContentLoaded', function() {
     openPartyModalButton.addEventListener('click', () => {
         isEditingParty = false;
         currentPartyId = null;
-        resetPartyForm();
-        loadPartyMembers(); // Cargar miembros disponibles antes de abrir el modal
-        partyModal.style.display = 'flex';
+    
+        loadPartyMembers() // Cargar miembros disponibles antes de restablecer el formulario
+            .then(() => {
+                resetPartyForm();
+                partyModal.style.display = 'flex';
+            })
+            .catch(error => console.error('Error al cargar los miembros del party:', error));
     });
+    
 
     closePartyModalButton.addEventListener('click', () => {
         partyModal.style.display = 'none';
